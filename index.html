@@ -1,16 +1,106 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Bouncing Balls</title>
-    <style>
-      canvas {
-        border: 2px solid black;
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    canvas {
+      border: 1px solid #000;
+    }
+  </style>
+  <title>Wrapping Balls with Collisions</title>
+</head>
+<body>
+  <canvas id="wrappingBallsCanvas" width="600" height="400"></canvas>
+
+  <script>
+    const canvas = document.getElementById("wrappingBallsCanvas");
+    const ctx = canvas.getContext("2d");
+
+    class Ball {
+      constructor(x, y, radius, color, dx, dy) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.color = color;
+        this.dx = dx;
+        this.dy = dy;
       }
-    </style>
-  </head>
-  <body>
-    <canvas id="canvas" width="600" height="400"></canvas>
-    <script src="bballs1.js"></script>
-  </body>
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+      }
+
+      update() {
+        // Update position
+        this.x += this.dx;
+        this.y += this.dy;
+
+        // Wrap around the screen
+        if (this.x - this.radius > canvas.width) {
+          this.x = -this.radius;
+        } else if (this.x + this.radius < 0) {
+          this.x = canvas.width + this.radius;
+        }
+
+        if (this.y - this.radius > canvas.height) {
+          this.y = -this.radius;
+        } else if (this.y + this.radius < 0) {
+          this.y = canvas.height + this.radius;
+        }
+      }
+
+      checkCollision(otherBall) {
+        const distance = Math.sqrt((this.x - otherBall.x) ** 2 + (this.y - otherBall.y) ** 2);
+
+        if (distance < this.radius + otherBall.radius) {
+          // Collision detected, swap velocities
+          const tempDx = this.dx;
+          const tempDy = this.dy;
+
+          this.dx = otherBall.dx;
+          this.dy = otherBall.dy;
+
+          otherBall.dx = tempDx;
+          otherBall.dy = tempDy;
+        }
+      }
+    }
+
+    // Create 10 balls with random speeds
+    const balls = [];
+    for (let i = 0; i < 10; i++) {
+      const radius = Math.random() * 20 + 10; // Random radius between 10 and 30
+      const x = Math.random() * (canvas.width - 2 * radius) + radius;
+      const y = Math.random() * (canvas.height - 2 * radius) + radius;
+      const dx = (Math.random() - 0.5) * 5; // Random horizontal speed
+      const dy = (Math.random() - 0.5) * 5; // Random vertical speed
+      const color = `rgb(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255})`;
+      balls.push(new Ball(x, y, radius, color, dx, dy));
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (const ball of balls) {
+        ball.draw();
+        ball.update();
+
+        for (const otherBall of balls) {
+          if (ball !== otherBall) {
+            ball.checkCollision(otherBall);
+          }
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
 </html>

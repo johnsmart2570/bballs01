@@ -46,8 +46,7 @@ function Ball() {
     }
   }
   
-  // HTML
-  <canvas id="canvas" Width="400" Height="300"></canvas>
+  // HTML <canvas id="canvas" Width="400" Height="300"></canvas>
   
   // JavaScript
   function animate() {
